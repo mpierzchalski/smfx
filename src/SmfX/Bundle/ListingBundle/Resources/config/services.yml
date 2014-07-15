@@ -1,0 +1,29 @@
+parameters:
+    smfx.input.adapter.class: SmfX\Bundle\ListingBundle\Input\RequestInput
+    smfx.form.filter.extension.class: SmfX\Bundle\ListingBundle\Form\Extension\FilterTypeExtension
+    smfx.listing.class: SmfX\Component\Listing\ListingContainer
+    smfx.listing.storage.session: SmfX\Component\Listing\Storage\Session
+    smfx.listing.filter.doctrine: SmfX\Component\Listing\Filter\DoctrineFilter
+    smfx.collection.filtered.doctrine: SmfX\Component\Collection\Filtered\DoctrineCollection
+
+services:
+    form.type_extension.smfx_listing_filter:
+        class: %smfx.form.filter.extension.class%
+        tags:
+            - { name: "form.type_extension", alias: "form" }
+
+    smfx_listing.input_adapter:
+        class: %smfx.input.adapter.class%
+        arguments: [@service_container]
+
+    smfx_listing.session_storage:
+        class: %smfx.listing.storage.session%
+        arguments: [@session, "namespace"]
+
+    smfx_listing.filter_doctrine:
+        class: %smfx.listing.filter.doctrine%
+        arguments: [@doctrine]
+
+    smfx_collection.filtered_doctrine:
+        class: %smfx.collection.filtered.doctrine%
+        arguments: [@doctrine, @smfx_listing.filter_doctrine]

@@ -1,0 +1,3 @@
+smfx_listing_container:
+    storage: smfx_listing.session_storage
+    namespace: SmfXListingNamespace_

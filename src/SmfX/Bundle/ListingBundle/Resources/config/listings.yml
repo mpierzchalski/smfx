@@ -1,0 +1,11 @@
+#smfx_listing:
+#    smfx_listing_index:
+#        route:
+#        service:
+#        filter:
+#            adapter: doctrine2
+#            entityName:
+#            orderMapping:
+#              - { id: c.id }
+#            orderDirection: DESC
+#            loadMethod: findByFilter
