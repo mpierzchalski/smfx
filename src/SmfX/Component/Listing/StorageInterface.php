@@ -20,7 +20,7 @@ interface StorageInterface
     /**
      * Method reads storage
      *
-     * @return mixed
+     * @return ListingSnapshot|null
      */
     public function read();
 

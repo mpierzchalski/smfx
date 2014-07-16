@@ -400,6 +400,9 @@ class Filter
             if (!empty($_outputFormat)) {
                 $this->getCollection()->setMode(FilteredCollection::MODE_FILTER_OFF);
             }
+            // launch query
+            $this->getCollection()->toArray();
+
             return $this->getCollection();
 
         } catch (\Exception $e) {

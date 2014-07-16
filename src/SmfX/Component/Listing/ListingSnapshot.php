@@ -35,8 +35,13 @@ class ListingSnapshot
     {
         $this->snapshot = array(
             'name'          => $this->_listing->getName(),
-            'identifiers'   => $this->_listing->getStackRows()->getKeys()
+            'identifiers'   => $this->_listing->getStackRows()->getKeys(),
         );
+        if (($filter = $this->_listing->getFilter()) instanceof Filter) {
+            if (($form = $filter->getForm()) !== null) {
+                $this->snapshot['formData'] = $form->getData();
+            }
+        }
         $this->_listing = null;
         return array('snapshot');
     }
@@ -59,5 +64,15 @@ class ListingSnapshot
     public function getIdentifiers()
     {
         return $this->snapshot['identifiers'];
+    }
+
+    /**
+     * Gets form data
+     *
+     * @return array
+     */
+    public function getFormData()
+    {
+        return (isset($this->snapshot['formData'])) ? $this->snapshot['formData'] : array();
     }
 }

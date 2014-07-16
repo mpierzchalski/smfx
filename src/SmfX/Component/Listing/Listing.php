@@ -94,6 +94,11 @@ class Listing
     private $_pickedElement;
 
     /**
+     * @var boolean
+     */
+    private $_initialized = false;
+
+    /**
      * Constructor
      *
      * @param string $name
@@ -213,6 +218,7 @@ class Listing
      */
     public function __call($name, $arguments)
     {
+        $this->_initialize();
         switch (true) {
 
             // Example: findOneById - search by Id which value is gotten from request query param "id".
@@ -245,6 +251,40 @@ class Listing
     }
 
     /**
+     * Method initialize listing
+     *
+     * @return void
+     * @throws \RuntimeException
+     */
+    private function _initialize()
+    {
+        if (!$this->_initialized) {
+            //Look up into storage
+            if (!$this->_storage->isEmpty()) {
+                $snapshot = $this->_storage->read();
+
+                if ($this->getName() !== $snapshot->getName()) {
+                    throw new \RuntimeException(sprintf(
+                        'Listing name violation! Stored data(%s) has different name than initialized(%s).',
+                        $snapshot->getName(),
+                        $this->getName()
+                    ));
+                }
+
+                // Sets stack elements keys
+                $this->_stackElementsKeys = new ArrayCollection($snapshot->getIdentifiers());
+
+                // Sets data to form if exists
+                $form = $this->getFilter()->getForm();
+                if ($form instanceof FilterForm) {
+                    $form->setData($snapshot->getFormData());
+                }
+            }
+            $this->_initialized = true;
+        }
+    }
+
+    /**
      * Loads data from stack.
      *
      * @param string $name
@@ -260,7 +300,7 @@ class Listing
                 return null; //todo: NoResultException
             }
         }
-        return $this->getRow($paramName);
+        return $this->pickRow($this->_input->get($paramName));
     }
 
     /**
@@ -348,14 +388,6 @@ class Listing
      */
     public function getStackRowsIdentifiers()
     {
-        if (null === $this->_stackElementsKeys) {
-            //Look up into storage
-            if (!$this->_storage->isEmpty()) {
-                /** @var ListingSnapshot $snapshot */
-                $snapshot = $this->_storage->read();
-                $this->_stackElementsKeys = new ArrayCollection($snapshot->getIdentifiers());
-            }
-        }
         return $this->_stackElementsKeys;
     }
 
@@ -383,6 +415,8 @@ class Listing
      */
     public function pickRow($id, $mapping = null)
     {
+        $this->_initialize();
+
         if (!$this->_issetId($id)) {
             throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
         }

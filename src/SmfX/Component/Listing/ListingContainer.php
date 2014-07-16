@@ -109,26 +109,24 @@ class ListingContainer
     public function add(Listing $listing)
     {
         if (!array_key_exists($listing->getName(), self::$_stack)) {
-            self::$_stack[$listing->getName()] = $listing;
-
-            $listing->setStorage($this->getStorage($listing->getName()));
-            $input = new Input($this->_serviceContainer->get('smfx_listing.input_adapter'));
-
-            if (isset($listing->getConfig()['service']) && empty($listing->getConfig()['service'])) {
-                $listing->setService($this->_serviceContainer->get($listing->getConfig()['service']));
-            }
-
             if (!isset($listing->getConfig()['filter']) || empty($listing->getConfig()['filter'])) {
                 throw new \InvalidArgumentException('Unknown listing filter class!');
             }
             $filterConfig  = $listing->getConfig()['filter'];
             $filterBuilder = new FilterBuilder($filterConfig);
-            $filter        = $filterBuilder->build($this->_serviceContainer);
             $listing
-                ->setFilter($filter)
-                ->setInput($input);
+                ->setFilter($filterBuilder->build($this->_serviceContainer))
+                ->setInput($this->getInput());
 
+            $listingStorage = $this->getStorage($listing->getName());
+            $listing->setStorage($listingStorage);
+
+            if (isset($listing->getConfig()['service']) && empty($listing->getConfig()['service'])) {
+                $listing->setService($this->_serviceContainer->get($listing->getConfig()['service']));
+            }
             $listing->registerView(new ListingView($listing, $this->getRouter()));
+
+            self::$_stack[$listing->getName()] = $listing;
         }
         return $this;
     }
@@ -140,6 +138,14 @@ class ListingContainer
     public function getStorage($name)
     {
         return new Storage($this->_storageAdapter, $this->_storageNamespace, $name);
+    }
+
+    /**
+     * @return Input
+     */
+    public function getInput()
+    {
+        return new Input($this->_serviceContainer->get('smfx_listing.input_adapter'));
     }
 
 }

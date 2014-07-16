@@ -53,6 +53,29 @@ class FilterForm
     }
 
     /**
+     * Gets form data
+     *
+     * @return mixed
+     */
+    public function getData()
+    {
+        return array($this->_form->getName() => $this->_form->getData());
+    }
+
+    /**
+     * Sets form data
+     *
+     * @param array $data
+     * @return $this
+     */
+    public function setData($data)
+    {
+        $formData = isset($data[$this->_form->getName()]) ? $data[$this->_form->getName()] : null;
+        $this->_form->setData($formData);
+        return $this;
+    }
+
+    /**
      * Gets parameters
      *
      * @return mixed

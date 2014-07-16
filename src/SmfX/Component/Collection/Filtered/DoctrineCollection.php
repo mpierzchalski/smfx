@@ -97,6 +97,7 @@ class DoctrineCollection extends FilteredCollection
         if ($this->_loaded && !$this->_elements) {
             return array();
         }
+
         if (!$this->_loaded) {
             $this->load();
         }
@@ -149,6 +150,7 @@ class DoctrineCollection extends FilteredCollection
      */
     public function slice($offset, $length = null)
     {
+        $this->_loaded = true;
         $repository = $this->_getEm()->getRepository($this->_repository);
         if (is_object($repository)) {
             $result = call_user_func_array(array($repository, $this->_method), $this->_filterParams);

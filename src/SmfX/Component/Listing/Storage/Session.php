@@ -8,6 +8,7 @@
 namespace SmfX\Component\Listing\Storage;
 
 
+use SmfX\Component\Listing\ListingSnapshot;
 use SmfX\Component\Listing\StorageAdapterInterface;
 use SmfX\Component\Listing\StorageInterface;
 use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
@@ -64,7 +65,7 @@ class Session implements StorageInterface, StorageAdapterInterface
     /**
      * Method reads storage
      *
-     * @return mixed
+     * @return ListingSnapshot|null
      */
     public function read()
     {
