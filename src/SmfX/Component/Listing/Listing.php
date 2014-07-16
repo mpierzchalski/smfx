@@ -9,9 +9,14 @@ namespace SmfX\Component\Listing;
 use SmfX\Component\Collection\ArrayCollection;
 use SmfX\Component\Collection\FilteredCollection;
 use SmfX\Component\Listing\Exceptions\Listing\NoFilterException;
+use SmfX\Component\Listing\Exceptions\Listing\NoResultException;
+use SmfX\Component\Listing\Exceptions\Listing\StackLoaderException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * @method void findAll() findAll() main method launching list
+ */
 class Listing
 {
 
@@ -289,6 +294,7 @@ class Listing
      *
      * @param string $name
      * @return mixed
+     * @throws NoResultException
      */
     protected function _oneLoad($name = null)
     {
@@ -297,7 +303,7 @@ class Listing
             $this->_oneLoadMethod = $name;
             $paramName = strtolower(substr($name, strlen('findOneBy')));
             if (empty($paramName)) {
-                return null; //todo: NoResultException
+                throw new NoResultException('Item not found.');
             }
         }
         return $this->pickRow($this->_input->get($paramName));
@@ -310,6 +316,7 @@ class Listing
      * @param array $arguments
      * @return ListingResult
      * @throws NoFilterException
+     * @throws StackLoaderException
      */
     protected function _listLoad($name, $arguments)
     {
@@ -320,22 +327,13 @@ class Listing
         $this->getFilter()->handleInput($this->_input);
         if (!$filter->isValid()) {
             $this->getFilter()->getCollection()->clear();
-            return new ListingResult(
-                ListingResult::FAILURE_FILTER,
-                ListingResult::TYPE_ERROR,
-                "Seems filter contains some errors!"
-            );
         } else {
             $items = $filter
                 ->setArguments($arguments)
                 ->loadStack($name);
 
             if (!$items instanceof FilteredCollection) {
-                return new ListingResult(
-                    ListingResult::FAILURE_FILTER,
-                    ListingResult::TYPE_ERROR,
-                    "Some errors have been occurred during reading data!"
-                );
+                throw new StackLoaderException("Some errors have been occurred during reading data!");
             }
             $this->setStackRows($items);
         }
@@ -412,6 +410,7 @@ class Listing
      * @param string  $mapping[optional]     - ORM mapping column
      * @return mixed
      * @throws NotFoundHttpException
+     * @throws NoResultException
      */
     public function pickRow($id, $mapping = null)
     {
@@ -431,10 +430,29 @@ class Listing
             ->get($id, $this->_oneLoadMethod);
 
         if (!$this->_isGetRowResultValid($result)) {
-            return null; //todo: NoResultException
+            throw new NoResultException('Item not found.');
         }
         $this->_pickedElement = new ListingRow($this->createView(), $result);
         return $this->_pickedElement;
+    }
+
+    /**
+     * Adds static parameter for filtering data
+     *
+     * @param string    $name
+     * @param mixed     $value
+     * @param string    $mapping - ORM Mapping
+     * @param string    $condition[optional] - default: '='
+     * @return $this
+     */
+    public function addFilterParameter($name, $value, $mapping, $condition = '=')
+    {
+        $this->getFilter()->createParameter($name, $value, $condition, array(
+            'mapping'  => $mapping,
+            'hidden'   => true,
+            'readonly' => true,
+        ));
+        return $this;
     }
 
     /**
