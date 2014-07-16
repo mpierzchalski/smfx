@@ -1,4 +1,5 @@
 parameters:
+    smfx.twig.pagination_helper.extension.class: SmfX\Bundle\ListingBundle\Twig\PaginationHelperExtension
     smfx.input.adapter.class: SmfX\Bundle\ListingBundle\Input\RequestInput
     smfx.form.filter.extension.class: SmfX\Bundle\ListingBundle\Form\Extension\FilterTypeExtension
     smfx.listing.class: SmfX\Component\Listing\ListingContainer
@@ -11,6 +12,12 @@ services:
         class: %smfx.form.filter.extension.class%
         tags:
             - { name: "form.type_extension", alias: "form" }
+
+    smfx_listing.twig.pagination_helper_extension:
+        class: %smfx.twig.pagination_helper.extension.class%
+        arguments: [@form.factory]
+        tags:
+            - { name: twig.extension }
 
     smfx_listing.input_adapter:
         class: %smfx.input.adapter.class%

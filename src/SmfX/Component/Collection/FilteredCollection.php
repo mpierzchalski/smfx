@@ -58,6 +58,11 @@ class FilteredCollection extends CollectionAbstract
     protected $_totalCounts = 0;
 
     /**
+     * @var integer
+     */
+    protected $_partsAmount = 0;
+
+    /**
      * @var string
      */
     protected $_mode = self::MODE_FILTER_ON;
@@ -176,6 +181,9 @@ class FilteredCollection extends CollectionAbstract
         if ($this->_mode == self::MODE_FILTER_ON) {
             if ($filter instanceof FilterAdapterInterface) {
                 $this->_totalCounts = $filter->getTotalQueryResult();
+                if ($this->_totalCounts > 0) {
+                    $this->_partsAmount = ceil($this->_totalCounts/$this->_limit);
+                }
             }
         }
         if (empty($_elements)) {
@@ -196,6 +204,26 @@ class FilteredCollection extends CollectionAbstract
         $this->_partNo   = $partNo;
         $this->_partials = true;
         return $this->load();
+    }
+
+    /**
+     * Gets current part number
+     *
+     * @return int
+     */
+    public function getCurrentPart()
+    {
+        return $this->_partNo;
+    }
+
+    /**
+     * Gets pages amount
+     *
+     * @return int
+     */
+    public function getPagesAmount()
+    {
+        return $this->_partsAmount;
     }
 
     /**

@@ -75,8 +75,68 @@ class ListingView
         }
         $url = $this->_router->generate($this->_list->getConfig()['route'], $params);
         if (true === $view) {
-            $url = urlencode($url);
+            $url = preg_replace('/\&/', '&amp;', $url);
         }
         return $url;
     }
-} 
+
+    /**
+     * Gets limiter choices
+     *
+     * @return array
+     */
+    public function getLimiterChoices()
+    {
+        return Filter::limiterOptions();
+    }
+
+    /**
+     * Gets page limit
+     *
+     * @return int
+     */
+    public function getPageLimit()
+    {
+        return $this->_list->getFilter()->getPageLimit();
+    }
+
+    /**
+     * Checks if list is paginated
+     *
+     * @return bool
+     */
+    public function isPaginated()
+    {
+        return $this->_list->getFilter()->isPaginated();
+    }
+
+    /**
+     * Gets total amount of rows
+     *
+     * @return int
+     */
+    public function getRowsAmount()
+    {
+        return $this->_list->getFilter()->getCollection()->getTotalQuantity();
+    }
+
+    /**
+     * Gets current page number
+     *
+     * @return int
+     */
+    public function getCurrentPage()
+    {
+        return $this->_list->getFilter()->getCollection()->getCurrentPart();
+    }
+
+    /**
+     * Gets last page number
+     *
+     * @return int
+     */
+    public function getLastPage()
+    {
+        return $this->_list->getFilter()->getCollection()->getPagesAmount();
+    }
+}

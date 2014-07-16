@@ -268,7 +268,7 @@ class Filter
     /**
      * @return boolean
      */
-    public function getPagination()
+    public function isPaginated()
     {
         return $this->_pagination;
     }
