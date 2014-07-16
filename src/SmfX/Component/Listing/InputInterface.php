@@ -23,6 +23,14 @@ interface InputInterface
     public function handle($filter);
 
     /**
+     * Gets query parameter value
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function get($name);
+
+    /**
      * Gets output format
      *
      * @return string

@@ -75,4 +75,11 @@ class RequestInput implements InputInterface
         return $this;
     }
 
-} 
+    /**
+     * {@inheritdoc}
+     */
+    public function get($name)
+    {
+        return $this->_request->get($name);
+    }
+}

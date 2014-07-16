@@ -7,6 +7,7 @@
  
 namespace SmfX\Bundle\ListingBundle\DependencyInjection\Compiler;
 
+use SmfX\Component\Listing\Storage\Session;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
@@ -36,6 +37,12 @@ class SmfxListingCompilerPass implements CompilerPassInterface
                 $container->setDefinition('smfx.listings.' . $name, $listing);
             }
         }
+        $registerBag = new Definition(
+            $container->getParameter('session.attribute_bag.class'),
+            array(Session::BAG_NAME . '_attributes')
+        );
+        $registerBag->addMethodCall('setName', array(Session::BAG_NAME));
+        $container->getDefinition('session')->addMethodCall('registerBag', array($registerBag));
     }
 
 } 

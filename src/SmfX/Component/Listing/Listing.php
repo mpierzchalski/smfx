@@ -6,9 +6,11 @@
  */
 
 namespace SmfX\Component\Listing;
+use SmfX\Component\Collection\ArrayCollection;
 use SmfX\Component\Collection\FilteredCollection;
 use SmfX\Component\Listing\Exceptions\Listing\NoFilterException;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Listing
 {
@@ -29,7 +31,7 @@ class Listing
     /**
      * @var string
      */
-    private $_mode = self::MODE_FULL;
+    private $_mode = self::MODE_READONLY;
 
     /**
      * @var string
@@ -67,9 +69,29 @@ class Listing
     private $_stackElements;
 
     /**
+     * @var ArrayCollection
+     */
+    private $_stackElementsKeys;
+
+    /**
      * @var ListingView
      */
     private $_view;
+
+    /**
+     * @var string
+     */
+    private $_oneLoadMethod = '';
+
+    /**
+     * @var string
+     */
+    private $_listSaveMethod = '';
+
+    /**
+     * @var mixed
+     */
+    private $_pickedElement;
 
     /**
      * Constructor
@@ -223,6 +245,25 @@ class Listing
     }
 
     /**
+     * Loads data from stack.
+     *
+     * @param string $name
+     * @return mixed
+     */
+    protected function _oneLoad($name = null)
+    {
+        $paramName = null;
+        if (null !== $name) {
+            $this->_oneLoadMethod = $name;
+            $paramName = strtolower(substr($name, strlen('findOneBy')));
+            if (empty($paramName)) {
+                return null; //todo: NoResultException
+            }
+        }
+        return $this->getRow($paramName);
+    }
+
+    /**
      * Calls service's methods and decorate data in collector object
      *
      * @param string $name
@@ -262,12 +303,31 @@ class Listing
     }
 
     /**
+     * Saves list form
+     *
+     * @throws \RuntimeException
+     */
+    protected function _listSave()
+    {
+        throw new \RuntimeException('Method not implemented yet!');
+    }
+
+    /**
+     * Saves list snapshot to storage
+     */
+    protected function _saveData()
+    {
+        $this->_storage->write(new ListingSnapshot($this));
+    }
+
+    /**
      * Creates View object
      *
      * @return ListingView
      */
     public function createView()
     {
+        $this->_saveData();
         return $this->_view;
     }
 
@@ -282,6 +342,24 @@ class Listing
     }
 
     /**
+     * Gets identifiers result rows
+     *
+     * @return ArrayCollection|null
+     */
+    public function getStackRowsIdentifiers()
+    {
+        if (null === $this->_stackElementsKeys) {
+            //Look up into storage
+            if (!$this->_storage->isEmpty()) {
+                /** @var ListingSnapshot $snapshot */
+                $snapshot = $this->_storage->read();
+                $this->_stackElementsKeys = new ArrayCollection($snapshot->getIdentifiers());
+            }
+        }
+        return $this->_stackElementsKeys;
+    }
+
+    /**
      * Sets list result
      *
      * @param FilteredCollection $items [optional]
@@ -289,8 +367,92 @@ class Listing
      */
     public function setStackRows(FilteredCollection $items = null)
     {
-        $this->_stackElements = $items;
+        $this->_stackElements     = $items;
+        $this->_stackElementsKeys = new ArrayCollection($items->getKeys());
         return $this;
+    }
+
+    /**
+     * Gets row from stack.
+     * It can be used in findOneBy{$paramName}() convention;
+     *
+     * @param string $paramName[optional]   - default: id
+     * @param string $mapping[optional]     - ORM mapping column
+     * @return mixed
+     * @throws NotFoundHttpException
+     */
+    public function pickRow($paramName = null, $mapping = null)
+    {
+        if (null !== $paramName) {
+            $id = (string)$this->_input->get($paramName);
+            if (empty($id)) {
+                return null;
+            }
+            if (!$this->_issetId($id)) {
+                throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
+            }
+        } else {
+            $id = $this->getId();
+        }
+        if (empty($id)) {
+            return null; //todo: NoResultException
+        }
+        if (empty($this->_oneLoadMethod)) {
+            $this->_oneLoadMethod = (null !== $mapping)
+                ? 'findOneBy' . ucfirst($mapping)
+                : 'find';
+        }
+
+        $result = $this->getFilter()
+            ->getCollection()
+            ->get($id, $this->_oneLoadMethod);
+
+        if (!$this->_isGetRowResultValid($result)) {
+            return null; //todo: NoResultException
+        }
+        $this->_pickedElement = $result;
+        return $result;
+    }
+
+    /**
+     * Gets Id if exists in stack
+     *
+     * @return object|null
+     * @throws NotFoundHttpException
+     */
+    public function getId()
+    {
+        $id = (int)$this->_input->get('id');
+        if (empty($id)) {
+            return null;
+        }
+        if (!$this->_issetId($id)) {
+            throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
+        }
+        return $id;
+    }
+
+    /**
+     * Checks if Id exists in stack
+     *
+     * @param integer $id
+     * @return boolean
+     */
+    protected function _issetId($id)
+    {
+        $stack = $this->getStackRowsIdentifiers();
+        return !($stack->count() == 0 || !in_array($id, $stack->toArray()));
+    }
+
+    /**
+     * Checks if getRow() method result contains any useful data.
+     *
+     * @param mixed $result
+     * @return bool
+     */
+    protected function _isGetRowResultValid($result)
+    {
+        return is_object($result) || (is_array($result) && !empty($result));
     }
 
 }

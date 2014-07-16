@@ -64,4 +64,12 @@ class Input implements InputInterface
         $this->_component->setFilterParameters($parameters);
         return $this;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function get($name)
+    {
+        return $this->_component->get($name);
+    }
 }

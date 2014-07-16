@@ -44,6 +44,12 @@ class DoctrineCollection extends FilteredCollection
     protected $_useDecorator = false;
 
     /**
+     * @var bool
+     * todo: hash from filterParams
+     */
+    private $_loaded = false;
+
+    /**
      * Constructor overwrites parent construct in order to provide doctrine2 container.
      *
      * @param Registry               $doctrine
@@ -88,10 +94,12 @@ class DoctrineCollection extends FilteredCollection
      */
     public function getKeys()
     {
-        if (!$this->_elements) {
+        if ($this->_loaded && !$this->_elements) {
             return array();
         }
-
+        if (!$this->_loaded) {
+            $this->load();
+        }
         $identifiers = array();
         foreach ($this->_elements as &$element) {
             if (!$identifier = $this->getIdentifier($element)) {

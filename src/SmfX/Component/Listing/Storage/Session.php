@@ -10,10 +10,16 @@ namespace SmfX\Component\Listing\Storage;
 
 use SmfX\Component\Listing\StorageAdapterInterface;
 use SmfX\Component\Listing\StorageInterface;
+use Symfony\Component\HttpFoundation\Session\Attribute\NamespacedAttributeBag;
 use Symfony\Component\HttpFoundation\Session\Session as SessionService;
 
 class Session implements StorageInterface, StorageAdapterInterface
 {
+
+    /**
+     * Name of attribute bag
+     */
+    const BAG_NAME = 'smfx_listing';
 
     /**
      * @var SessionService
@@ -52,7 +58,7 @@ class Session implements StorageInterface, StorageAdapterInterface
      */
     public function isEmpty()
     {
-        return !isset($this->_session->{$this->_key});
+        return false === $this->_session->getBag(self::BAG_NAME)->get($this->_key, false);
     }
 
     /**
@@ -62,7 +68,7 @@ class Session implements StorageInterface, StorageAdapterInterface
      */
     public function read()
     {
-        return $this->_session->{$this->_key};
+        return $this->_session->getBag(self::BAG_NAME)->get($this->_key);
     }
 
     /**
@@ -73,7 +79,7 @@ class Session implements StorageInterface, StorageAdapterInterface
      */
     public function write($data)
     {
-        $this->_session->{$this->_key} = $data;
+        $this->_session->getBag(self::BAG_NAME)->set($this->_key, $data);
     }
 
     /**
@@ -83,7 +89,7 @@ class Session implements StorageInterface, StorageAdapterInterface
      */
     public function clear()
     {
-        unset($this->_session->{$this->_key});
+        $this->_session->getBag(self::BAG_NAME)->clean();
     }
 
 } 
