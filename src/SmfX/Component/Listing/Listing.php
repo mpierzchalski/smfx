@@ -376,26 +376,15 @@ class Listing
      * Gets row from stack.
      * It can be used in findOneBy{$paramName}() convention;
      *
-     * @param string $paramName[optional]   - default: id
-     * @param string $mapping[optional]     - ORM mapping column
+     * @param integer $id
+     * @param string  $mapping[optional]     - ORM mapping column
      * @return mixed
      * @throws NotFoundHttpException
      */
-    public function pickRow($paramName = null, $mapping = null)
+    public function pickRow($id, $mapping = null)
     {
-        if (null !== $paramName) {
-            $id = (string)$this->_input->get($paramName);
-            if (empty($id)) {
-                return null;
-            }
-            if (!$this->_issetId($id)) {
-                throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
-            }
-        } else {
-            $id = $this->getId();
-        }
-        if (empty($id)) {
-            return null; //todo: NoResultException
+        if (!$this->_issetId($id)) {
+            throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
         }
         if (empty($this->_oneLoadMethod)) {
             $this->_oneLoadMethod = (null !== $mapping)
@@ -410,26 +399,8 @@ class Listing
         if (!$this->_isGetRowResultValid($result)) {
             return null; //todo: NoResultException
         }
-        $this->_pickedElement = $result;
-        return $result;
-    }
-
-    /**
-     * Gets Id if exists in stack
-     *
-     * @return object|null
-     * @throws NotFoundHttpException
-     */
-    public function getId()
-    {
-        $id = (int)$this->_input->get('id');
-        if (empty($id)) {
-            return null;
-        }
-        if (!$this->_issetId($id)) {
-            throw new NotFoundHttpException('Id(' . $id . ') is not found in stack.');
-        }
-        return $id;
+        $this->_pickedElement = new ListingRow($this->createView(), $result);
+        return $this->_pickedElement;
     }
 
     /**
