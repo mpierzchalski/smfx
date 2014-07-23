@@ -74,7 +74,10 @@ class FilterBuilder
             $form = new $formClassName;
         }
         if (isset($form)) {
-            return new FilterForm($container->get('form.factory')->create($form));
+            return new FilterForm(
+                $container->get('form.factory')->create($form),
+                $container->get('smfx_listing.form.data_transformer')
+            );
         }
         return null;
     }

@@ -144,6 +144,19 @@ class Filter
     }
 
     /**
+     * Returns form filter data
+     *
+     * @return mixed|null
+     */
+    public function __sleep()
+    {
+        if (($form = $this->getForm()) !== null) {
+            return $form->getData();
+        }
+        return null;
+    }
+
+    /**
      * Creates filter parameter
      *
      * @param string    $name
@@ -168,6 +181,8 @@ class Filter
     public function handleInput(Input $input)
     {
         $this->_input = $input;
+        $this->setPageNo($input->get('page'));
+        $this->setPageLimit($input->get('page_limit'));
         if ($this->_form) {
             $this->_form->handleInput($input);
         }
@@ -220,7 +235,10 @@ class Filter
      */
     public function setPageLimit($pageLimit)
     {
-        $this->_pageLimit = $pageLimit;
+        if (!array_key_exists($pageLimit, self::limiterOptions())) {
+            $pageLimit = self::DEFAULT_LIMIT;
+        }
+        $this->_pageLimit = (int)$pageLimit;
         $this
             ->getCollection()
             ->setLimit($pageLimit)
@@ -243,7 +261,11 @@ class Filter
      */
     public function setPageNo($pageNo)
     {
-        $this->_pageNo = $pageNo;
+        $this->_pageNo = (!empty($pageNo) && is_numeric($pageNo)) ? $pageNo : 1;
+        $this
+            ->getCollection()
+            ->setPartNo($this->_pageNo-1);
+
         return $this;
     }
 
@@ -394,15 +416,24 @@ class Filter
             }
             $_arguments[] = $filterAdapter;
         }
-
         try {
             $this->getCollection()->setFilterParams($_arguments);
             if (!empty($_outputFormat)) {
                 $this->getCollection()->setMode(FilteredCollection::MODE_FILTER_OFF);
             }
             // launch query
-            $this->getCollection()->toArray();
+            $this->getCollection()->load();
 
+            if ($this->getCollection()->count() == 0 && $this->getPageNo() > 1) {
+                // Checks if collection is empty and page number is exceeded.
+                $fixedPageNo = 1;
+                if (($total = $this->getCollection()->getTotalQuantity()) > 0) {
+                    $fixedPageNo = ceil($total/$this->getPageLimit());
+                }
+                $this->setPageNo($fixedPageNo);
+                $this->getCollection()->clear();
+                $this->getCollection()->load();
+            }
             return $this->getCollection();
 
         } catch (\Exception $e) {
@@ -419,9 +450,6 @@ class Filter
      */
     public function setDefaultPageLimit($pageLimit = null)
     {
-        if (null !== $pageLimit && !array_key_exists($pageLimit, self::limiterOptions())) {
-            $pageLimit = null;
-        }
         if (empty($pageLimit)) {
             $pageLimit = $this->_config->getPageLimit();
         }

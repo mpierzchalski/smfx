@@ -104,6 +104,11 @@ class Listing
     private $_initialized = false;
 
     /**
+     * @var bool
+     */
+    private $_saved = false;
+
+    /**
      * Constructor
      *
      * @param string $name
@@ -355,7 +360,10 @@ class Listing
      */
     protected function _saveData()
     {
-        $this->_storage->write(new ListingSnapshot($this));
+        if (!$this->_saved) {
+            $this->_saved = true;
+            $this->_storage->write(new ListingSnapshot($this));
+        }
     }
 
     /**

@@ -29,7 +29,13 @@ class SmfxListingCompilerPass implements CompilerPassInterface
             return true;
         }
 
-        $listingContainer = $container->getDefinition('smfx.listing.container');
+        $listingContainer   = $container->getDefinition('smfx.listing.container');
+        $dataTransformer    = $container->getDefinition('smfx_listing.form.data_transformer');
+        $taggedTransformers = $container->findTaggedServiceIds('smfx_listing.form.data_transformer');
+        foreach ($taggedTransformers as $id => $attributes) {
+            $dataTransformer->addMethodCall('addTransformer', array(new Reference($id)));
+        }
+
         foreach ($config as $spec) {
             foreach ($spec as $name => $config) {
                 $listing = new Definition('SmfX\\Component\\Listing\\Listing', array($name, $config));

@@ -7,7 +7,6 @@
 
 namespace SmfX\Component\Listing;
 
-
 class ListingSnapshot
 {
     /**
@@ -36,12 +35,10 @@ class ListingSnapshot
         $this->snapshot = array(
             'name'          => $this->_listing->getName(),
             'identifiers'   => $this->_listing->getStackRows()->getKeys(),
+            'currentPage'   => $this->_listing->createView()->getCurrentPage(),
+            'pageLimit'     => $this->_listing->createView()->getPageLimit(),
+            'formData'      => $this->_listing->getFilter(),
         );
-        if (($filter = $this->_listing->getFilter()) instanceof Filter) {
-            if (($form = $filter->getForm()) !== null) {
-                $this->snapshot['formData'] = $form->getData();
-            }
-        }
         $this->_listing = null;
         return array('snapshot');
     }
@@ -64,6 +61,26 @@ class ListingSnapshot
     public function getIdentifiers()
     {
         return $this->snapshot['identifiers'];
+    }
+
+    /**
+     * Gets current page number
+     *
+     * @return mixed
+     */
+    public function getCurrentPage()
+    {
+        return $this->snapshot['currentPage'];
+    }
+
+    /**
+     * Gets page limit
+     *
+     * @return mixed
+     */
+    public function getPageLimit()
+    {
+        return $this->snapshot['pageLimit'];
     }
 
     /**

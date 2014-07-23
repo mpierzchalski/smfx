@@ -81,6 +81,16 @@ class ListingView
     }
 
     /**
+     * Gets number of first row in [page
+     *
+     * @return int
+     */
+    public function getFirstRowNo()
+    {
+        return $this->getPageLimit()*($this->getCurrentPage()-1);
+    }
+
+    /**
      * Gets limiter choices
      *
      * @return array

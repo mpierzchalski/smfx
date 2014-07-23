@@ -1,35 +1,37 @@
-<div class="row">
-    <div class="col-md-4">
-        <div class="pagination pull-left" style="width: 200px;">
-            {% if(limiter) %} {{ form(limiter) }} {% endif %}
+{% if (lastPage > 1) %}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="pagination pull-left" style="width: 200px;">
+                {% if(limiter) %} {{ form(limiter) }} {% endif %}
+            </div>
         </div>
-    </div>
-    <div class="col-md-4">
-        <div class="text-center">
-            <ul class="pagination">
+        <div class="col-md-4">
+            <div class="text-center">
+                <ul class="pagination">
+                    <li class="disabled">
+                        <a href="#">liczba wyników: {{ rowsAmount }}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <ul class="pagination pull-right">
+                <li>
+                    <a href="" class="prev">&laquo;</a>
+                </li>
+                <li>
+                    <a href="" class="prev">&LeftArrow;</a>
+                </li>
                 <li class="disabled">
-                    <a href="#">liczba wyników: {{ rowsAmount }}</a>
+                    <a href="#" class="current">Strona {{ currentPage}} z {{ lastPage }}</a>
+                </li>
+                <li>
+                    <a href="" class="next">&rightarrow;</a>
+                </li>
+                <li>
+                    <a href="" class="next">&raquo;</a>
                 </li>
             </ul>
         </div>
     </div>
-    <div class="col-md-4">
-        <ul class="pagination pull-right">
-            <li>
-                <a href="" class="prev">&laquo;</a>
-            </li>
-            <li>
-                <a href="" class="prev">&LeftArrow;</a>
-            </li>
-            <li class="disabled">
-                <a href="#" class="current">Strona {{ currentPage}} z {{ lastPage }}</a>
-            </li>
-            <li>
-                <a href="" class="next">&rightarrow;</a>
-            </li>
-            <li>
-                <a href="" class="next">&raquo;</a>
-            </li>
-        </ul>
-    </div>
-</div>
+{% endif %}

@@ -126,6 +126,18 @@ class FilteredCollection extends CollectionAbstract
     }
 
     /**
+     * Sets part number
+     *
+     * @param integer $partNo
+     * @return $this
+     */
+    public function setPartNo($partNo)
+    {
+        $this->_partNo = $partNo;
+        return $this;
+    }
+
+    /**
      * Sets mode, compatible with self::MODE_*
      *
      * @param string $mode

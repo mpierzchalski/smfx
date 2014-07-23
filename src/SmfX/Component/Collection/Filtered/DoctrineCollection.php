@@ -118,6 +118,7 @@ class DoctrineCollection extends FilteredCollection
     public function clear()
     {
         if (!empty($this->_elements)) {
+            $this->_loaded = false;
             $adapter = $this->_getEm();
             $current = current($this->_elements);
             if (is_object($current)) {

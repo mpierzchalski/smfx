@@ -2,10 +2,15 @@ parameters:
     smfx.twig.pagination_helper.extension.class: SmfX\Bundle\ListingBundle\Twig\PaginationHelperExtension
     smfx.input.adapter.class: SmfX\Bundle\ListingBundle\Input\RequestInput
     smfx.form.filter.extension.class: SmfX\Bundle\ListingBundle\Form\Extension\FilterTypeExtension
+
     smfx.listing.class: SmfX\Component\Listing\ListingContainer
     smfx.listing.storage.session: SmfX\Component\Listing\Storage\Session
     smfx.listing.filter.doctrine: SmfX\Component\Listing\Filter\DoctrineFilter
     smfx.collection.filtered.doctrine: SmfX\Component\Collection\Filtered\DoctrineCollection
+
+    smfx.listing.form.data_transformer.class: SmfX\Component\Listing\Form\DataTransformer
+    smfx.listing.form.data_transformer.standard.class: SmfX\Component\Listing\Form\DataTransformer\Standard
+    smfx.listing.form.data_transformer.entity.class: SmfX\Component\Listing\Form\DataTransformer\Entity
 
 services:
     form.type_extension.smfx_listing_filter:
@@ -18,6 +23,20 @@ services:
         arguments: [@form.factory]
         tags:
             - { name: twig.extension }
+
+    smfx_listing.form.data_transformer:
+        class: %smfx.listing.form.data_transformer.class%
+
+    smfx_listing.form.data_transformer.standard:
+        class: %smfx.listing.form.data_transformer.standard.class%
+        tags:
+            - { name: smfx_listing.form.data_transformer }
+
+    smfx_listing.form.data_transformer.entity:
+        class: %smfx.listing.form.data_transformer.entity.class%
+        arguments: [@doctrine]
+        tags:
+            - { name: smfx_listing.form.data_transformer }
 
     smfx_listing.input_adapter:
         class: %smfx.input.adapter.class%

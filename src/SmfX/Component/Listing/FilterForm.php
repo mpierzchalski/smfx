@@ -8,6 +8,7 @@
 namespace SmfX\Component\Listing;
 
 
+use SmfX\Component\Listing\Form\DataTransformer;
 use Symfony\Component\Form\Form;
 
 class FilterForm
@@ -18,13 +19,21 @@ class FilterForm
     protected $_form;
 
     /**
+     * @var DataTransformer
+     */
+    protected $_dataTransformer;
+
+    /**
      * Construct
      *
-     * @param mixed $form
+     * @param mixed             $form
+     * @param DataTransformer   $dataTransformer [optional]
      */
-    public function __construct($form)
+    public function __construct($form, DataTransformer $dataTransformer = null)
     {
-        $this->_form = $form;
+        $this->_form            = $form;
+        $this->_dataTransformer = $dataTransformer;
+        var_dump($this->_dataTransformer); exit;
     }
 
     /**
