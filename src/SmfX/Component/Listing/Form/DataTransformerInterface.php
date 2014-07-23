@@ -19,12 +19,20 @@ interface DataTransformerInterface
     public function valid($data);
 
     /**
-     * Transforms provided data
+     * Transforms provided data for snapshot
      *
      * @param mixed $data
      * @return mixed
      */
-    public function transform($data);
+    public function transformForSnapshot($data);
+
+    /**
+     * Transforms provided data from snapshot
+     *
+     * @param mixed $data
+     * @return mixed
+     */
+    public function transformFromSnapshot($data);
 
     /**
      * Gets unique data transfer's adapter name

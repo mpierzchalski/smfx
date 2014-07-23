@@ -287,7 +287,7 @@ class Listing
                 // Sets data to form if exists
                 $form = $this->getFilter()->getForm();
                 if ($form instanceof FilterForm) {
-                    $form->setData($snapshot->getFormData());
+                    $form->setData($snapshot->getFilter());
                 }
             }
             $this->_initialized = true;

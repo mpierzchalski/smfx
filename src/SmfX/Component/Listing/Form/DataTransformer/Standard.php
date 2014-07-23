@@ -17,13 +17,21 @@ class Standard implements DataTransformerInterface
      */
     public function valid($data)
     {
-        return !is_object($data) || !is_resource($data);
+        return !is_object($data) && !is_resource($data);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function transform($data)
+    public function transformForSnapshot($data)
+    {
+        return $data;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transformFromSnapshot($data)
     {
         return $data;
     }

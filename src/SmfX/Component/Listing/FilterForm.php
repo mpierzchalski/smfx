@@ -33,7 +33,6 @@ class FilterForm
     {
         $this->_form            = $form;
         $this->_dataTransformer = $dataTransformer;
-        var_dump($this->_dataTransformer); exit;
     }
 
     /**
@@ -56,7 +55,7 @@ class FilterForm
     public function isValid()
     {
         if ($this->_form->isSubmitted()) {
-            return $this->_form->isValid();
+            return true; //$this->_form->isValid();
         }
         return true;
     }
@@ -68,7 +67,8 @@ class FilterForm
      */
     public function getData()
     {
-        return array($this->_form->getName() => $this->_form->getData());
+        $data = $this->_dataTransformer->transformForSnapshot($this->_form->getData());
+        return array($this->_form->getName() => $data);
     }
 
     /**
@@ -80,7 +80,8 @@ class FilterForm
     public function setData($data)
     {
         $formData = isset($data[$this->_form->getName()]) ? $data[$this->_form->getName()] : null;
-        $this->_form->setData($formData);
+        $data     = $this->_dataTransformer->transformFromSnapshot($formData);
+        $this->_form->setData($data);
         return $this;
     }
 

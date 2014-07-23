@@ -37,7 +37,7 @@ class ListingSnapshot
             'identifiers'   => $this->_listing->getStackRows()->getKeys(),
             'currentPage'   => $this->_listing->createView()->getCurrentPage(),
             'pageLimit'     => $this->_listing->createView()->getPageLimit(),
-            'formData'      => $this->_listing->getFilter(),
+            'filter'        => $this->_listing->getFilter()->createSnapshot(),
         );
         $this->_listing = null;
         return array('snapshot');
@@ -84,12 +84,12 @@ class ListingSnapshot
     }
 
     /**
-     * Gets form data
+     * Gets filter data
      *
      * @return array
      */
-    public function getFormData()
+    public function getFilter()
     {
-        return (isset($this->snapshot['formData'])) ? $this->snapshot['formData'] : array();
+        return (isset($this->snapshot['filter'])) ? $this->snapshot['filter'] : array();
     }
 }

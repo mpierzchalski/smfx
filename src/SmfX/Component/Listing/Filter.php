@@ -12,7 +12,6 @@ use SmfX\Component\Collection\FilteredCollection;
 use SmfX\Component\Listing\Exceptions\Listing\FilterBuilderException;
 use SmfX\Component\Listing\Exceptions\Listing\StackLoaderException;
 use SmfX\Component\Listing\Filter\AdapterInterface as FilterAdapterInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class Filter
 {
@@ -144,11 +143,11 @@ class Filter
     }
 
     /**
-     * Returns form filter data
+     * Creates snapshot data
      *
-     * @return mixed|null
+     * @return array|null
      */
-    public function __sleep()
+    public function createSnapshot()
     {
         if (($form = $this->getForm()) !== null) {
             return $form->getData();

@@ -19,6 +19,11 @@ class Entity implements DataTransformerInterface
     private $_doctrine;
 
     /**
+     * @var array
+     */
+    private $_managersMapping = [];
+
+    /**
      * Construct
      *
      * @param Registry $doctrine
@@ -34,20 +39,48 @@ class Entity implements DataTransformerInterface
     public function valid($data)
     {
         if (is_object($data)) {
-            foreach ($this->_doctrine->getManagers() as $em) {
+            $class = get_class($data);
+            foreach ($this->_doctrine->getManagers() as $name => $em) {
                 /** @var \Doctrine\ORM\EntityManager $em */
-                var_dump($em->getClassMetadata($data));
+                if ($em->getMetadataFactory()->hasMetadataFor($class)) {
+                    $this->_managersMapping[$class] = $name;
+                    return true;
+                }
             }
         }
-        exit;
+        return false;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function transform($data)
+    public function transformForSnapshot($data)
     {
-        // TODO: Implement transform() method.
+        $class = get_class($data);
+        if (!array_key_exists($class, $this->_managersMapping)) {
+            throw new \OutOfBoundsException('Undefined class in ManagersMapping index.');
+        }
+        $entityIdentifierValue = $this->_doctrine
+            ->getManager($this->_managersMapping[$class])
+            ->getClassMetadata($class)
+            ->getIdentifierValues($data);
+
+        return array(
+            'manager'    => $this->_managersMapping[$class],
+            'class_name' => $class,
+            'id'         => $entityIdentifierValue,
+        );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function transformFromSnapshot($data)
+    {
+        $entityManagersName = $data['manager'];
+        $class              = $data['class_name'];
+        $id                 = $data['id'];
+        return $this->_doctrine->getManager($entityManagersName)->find($class, $id);
     }
 
     /**
