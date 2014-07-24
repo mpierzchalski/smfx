@@ -40,7 +40,9 @@ class ListingView
      */
     public function getFilterForm()
     {
-        return $this->_list->getFilter()->getForm()->createView();
+        return (($form = $this->_list->getFilter()->getForm()) instanceof FilterForm)
+            ? $form->createView()
+            : null;
     }
 
     /**
